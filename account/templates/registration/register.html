@@ -1,0 +1,135 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | TalentHub</title>
+    <link rel="stylesheet" href="{% static 'register.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1 class="auth-title">Join TalentHub</h1>
+                <p class="auth-subtitle">Create your account to get started</p>
+            </div>
+            
+            {% if errors %}
+                <div class="auth-errors">
+                    {% for field, error_list in errors.items %}
+                        {% for error in error_list %}
+                            <p class="auth-error"><strong>{{ field|title }}:</strong> {{ error }}</p>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <form class="auth-form" method="POST" action="">
+                {% csrf_token %}
+                <div class="form-field">
+                    <label for="email" class="field-label">Email Address</label>
+                    <input type="email" id="email" name="email" class="field-input" 
+                           placeholder="your@email.com" value="{{ data.email|default:'' }}" required>
+                    <div class="field-underline"></div>
+                </div>
+
+                <div class="form-field">
+                    <label for="fullname" class="field-label">Full Name</label>
+                    <input type="text" id="fullname" name="fullname" class="field-input" 
+                           placeholder="John Doe" value="{{ data.fullname|default:'' }}" required>
+                    <div class="field-underline"></div>
+                </div>
+
+                <div class="form-field">
+                    <label for="phone" class="field-label">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" class="field-input" 
+                           placeholder="+1 (123) 456-7890" value="{{ data.phone|default:'' }}" required>
+                    <div class="field-underline"></div>
+                </div>
+
+                <div class="form-field">
+                    <label for="user_type" class="field-label">I am a</label>
+                    <select id="user_type" name="user_type" class="field-input field-select" required>
+                        <option value="" disabled selected>Select account type</option>
+                        <option value="JOB_SEEKER" {% if data.user_type == 'JOB_SEEKER' %}selected{% endif %}>Job Seeker</option>
+                        <option value="EMPLOYER" {% if data.user_type == 'EMPLOYER' %}selected{% endif %}>Employer</option>
+                    </select>
+                    <div class="field-underline"></div>
+                </div>
+
+                <div class="form-field">
+                    <label for="password" class="field-label">Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="password" name="password" class="field-input" 
+                               placeholder="Create a password" required>
+                        <button type="button" class="password-toggle">
+                            <i class="far fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="field-underline"></div>
+                    <div class="field-hint">Use 8+ characters with letters, numbers & symbols</div>
+                </div>
+
+                <button type="submit" class="auth-submit-btn">
+                    <span class="btn-text">Create Account</span>
+                </button>
+            </form>
+
+            <div class="auth-divider">
+                <span class="divider-line"></span>
+                <span class="divider-text">OR</span>
+                <span class="divider-line"></span>
+            </div>
+
+            <div class="social-login-options">
+        <a href="/social-login/?provider=google" class="social-login-btn google-btn">
+          <span class="social-icon">
+            <i class="fab fa-google"></i>
+          </span>
+          <span class="social-text">Continue with Google</span>
+        </a>
+
+        <a href="/social-login/?provider=twitter" class="social-login-btn twitter-btn">
+          <span class="social-icon">
+            <i class="fab fa-twitter"></i>
+          </span>
+          <span class="social-text">Continue with Twitter</span>
+        </a>
+      </div>
+
+            <div class="auth-footer">
+                <p class="footer-text">Already have an account? <a href="/login" class="footer-link">Sign In</a></p>
+                
+            </div>
+        </div>
+
+        <div class="social-login-decoration">
+      <div class="decoration-circle circle-1"></div>
+      <div class="decoration-circle circle-2"></div>
+      <div class="decoration-circle circle-3"></div>
+      <div class="decoration-shape shape-1"></div>
+      <div class="decoration-shape shape-2"></div>
+    </div>
+    </div>
+    
+    <script>
+        // Password toggle functionality
+        document.querySelector('.password-toggle').addEventListener('click', function() {
+            const passwordInput = document.querySelector('#password');
+            const icon = this.querySelector('i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        });
+    </script>
+</body>
+</html>
