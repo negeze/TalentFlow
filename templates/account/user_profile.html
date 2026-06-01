@@ -1,0 +1,411 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile | CareerConnect</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'user_profile.css' %}">
+</head>
+<body>
+  {% include 'partials/navbar.html' %}
+  
+  <div class="container">
+    <h1>My Profile</h1>
+    <p class="subtitle">Manage your job seeker profile and information</p>
+    
+    <div class="profile-card">
+      <div class="profile-header">
+        <div class="profile-picture-container">
+          {% if jobseeker_profile.profile_picture %}
+            <img src="{{ jobseeker_profile.profile_picture.url }}" alt="Profile Picture" class="profile-picture" id="profile-picture">
+          {% else %}
+            <img src="{% static 'images/default-profile.png' %}" alt="Profile Picture" class="profile-picture" id="profile-picture">
+          {% endif %}
+          <div class="profile-picture-edit" onclick="openProfilePictureModal()">
+            <i class="fas fa-camera"></i>
+          </div>
+        </div>
+        <div class="profile-info">
+          <h2 class="profile-name">{{ user.fullname }}</h2>
+          <p class="profile-email">{{ user.email }}</p>
+          <div class="profile-meta">
+            <span><i class="fas fa-phone"></i> {{ user.phone }}</span>
+            {% if jobseeker_profile.linkedin_url %}
+              <span><i class="fab fa-linkedin"></i> <a href="{{ jobseeker_profile.linkedin_url }}" target="_blank">LinkedIn</a></span>
+            {% endif %}
+            {% if jobseeker_profile.portfolio_url %}
+              <span><i class="fas fa-globe"></i> <a href="{{ jobseeker_profile.portfolio_url }}" target="_blank">Portfolio</a></span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      
+      <div class="profile-section">
+        <h3>
+          <span><i class="fas fa-user"></i> About Me</span>
+          <button class="btn btn-outline btn-sm" onclick="toggleEdit('bio')">
+            <i class="fas fa-edit"></i> Edit
+          </button>
+        </h3>
+        <div class="profile-section-content" id="bio-display">
+          {% if jobseeker_profile.bio %}
+            <p>{{ jobseeker_profile.bio|linebreaks }}</p>
+          {% else %}
+            <p class="text-muted">No bio added yet. Tell employers about yourself!</p>
+          {% endif %}
+        </div>
+        <div class="form-group" id="bio-edit" style="display: none;">
+          <textarea class="form-control" id="bio-input" rows="5" placeholder="Tell employers about yourself...">{{ jobseeker_profile.bio }}</textarea>
+          <div class="action-buttons" style="margin-top: 10px;">
+            <button class="btn btn-primary" onclick="saveSection('bio')">Save</button>
+            <button class="btn btn-danger" onclick="toggleEdit('bio')">Cancel</button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="profile-section">
+        <h3>
+          <span><i class="fas fa-graduation-cap"></i> Education</span>
+          <button class="btn btn-outline btn-sm" onclick="toggleEdit('education')">
+            <i class="fas fa-edit"></i> Edit
+          </button>
+        </h3>
+        <div class="profile-section-content" id="education-display">
+          {% if jobseeker_profile.education %}
+            <p>{{ jobseeker_profile.education|linebreaks }}</p>
+          {% else %}
+            <p class="text-muted">Add your educational background to showcase your qualifications.</p>
+          {% endif %}
+        </div>
+        <div class="form-group" id="education-edit" style="display: none;">
+          <textarea class="form-control" id="education-input" rows="5" placeholder="Include your degrees, institutions, and years attended...">{{ jobseeker_profile.education }}</textarea>
+          <div class="action-buttons" style="margin-top: 10px;">
+            <button class="btn btn-primary" onclick="saveSection('education')">Save</button>
+            <button class="btn btn-danger" onclick="toggleEdit('education')">Cancel</button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="profile-section">
+        <h3>
+          <span><i class="fas fa-briefcase"></i> Work Experience</span>
+          <button class="btn btn-outline btn-sm" onclick="toggleEdit('experience')">
+            <i class="fas fa-edit"></i> Edit
+          </button>
+        </h3>
+        <div class="profile-section-content" id="experience-display">
+          {% if jobseeker_profile.experience %}
+            <p>{{ jobseeker_profile.experience|linebreaks }}</p>
+          {% else %}
+            <p class="text-muted">Highlight your professional experience to stand out to employers.</p>
+          {% endif %}
+        </div>
+        <div class="form-group" id="experience-edit" style="display: none;">
+          <textarea class="form-control" id="experience-input" rows="5" placeholder="List your work history, including company names, positions, and key achievements...">{{ jobseeker_profile.experience }}</textarea>
+          <div class="action-buttons" style="margin-top: 10px;">
+            <button class="btn btn-primary" onclick="saveSection('experience')">Save</button>
+            <button class="btn btn-danger" onclick="toggleEdit('experience')">Cancel</button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="profile-section">
+        <h3>
+          <span><i class="fas fa-code"></i> Skills & Expertise</span>
+          <button class="btn btn-outline btn-sm" onclick="toggleEdit('skills')">
+            <i class="fas fa-edit"></i> Edit
+          </button>
+        </h3>
+        <div class="profile-section-content" id="skills-display">
+          {% if jobseeker_profile.skills %}
+            <div class="skills-list">
+              {% for skill in jobseeker_profile.skills.splitlines %}
+                {% if skill.strip %}
+                  <span class="skill-tag">{{ skill }}</span>
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="text-muted">Add your key skills to help employers find you.</p>
+          {% endif %}
+        </div>
+        <div class="form-group" id="skills-edit" style="display: none;">
+          <textarea class="form-control" id="skills-input" rows="3" placeholder="Enter each skill on a new line...">{{ jobseeker_profile.skills }}</textarea>
+          <small class="text-muted">One skill per line</small>
+          <div class="action-buttons" style="margin-top: 10px;">
+            <button class="btn btn-primary" onclick="saveSection('skills')">Save</button>
+            <button class="btn btn-danger" onclick="toggleEdit('skills')">Cancel</button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="profile-section">
+        <h3>
+          <span><i class="fas fa-file-alt"></i> Resume</span>
+          <button class="btn btn-outline btn-sm" onclick="toggleEdit('resume')">
+            <i class="fas fa-edit"></i> Edit
+          </button>
+        </h3>
+        <div class="profile-section-content" id="resume-display">
+          {% if jobseeker_profile.resume %}
+            <p><a href="{{ jobseeker_profile.resume.url }}" target="_blank" class="btn btn-primary btn-sm"><i class="fas fa-download"></i> Download Resume</a></p>
+            <p><small>Uploaded on {{ jobseeker_profile.resume.uploaded_at|date:"M d, Y" }}</small></p>
+          {% else %}
+            <p class="text-muted">Upload your resume to apply for jobs quickly.</p>
+          {% endif %}
+        </div>
+        <div class="form-group" id="resume-edit" style="display: none;">
+          <label for="resume-input">Upload new resume (PDF or DOC)</label>
+          <input type="file" class="form-control" id="resume-input" accept=".pdf,.doc,.docx">
+          <small class="text-muted">Max file size: 5MB</small>
+          <div class="action-buttons" style="margin-top: 10px;">
+            <button class="btn btn-primary" onclick="saveSection('resume')">Upload</button>
+            <button class="btn btn-danger" onclick="toggleEdit('resume')">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Picture Upload Modal -->
+  <div class="modal" id="profile-picture-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Update Profile Picture</h3>
+        <button class="close-modal" onclick="closeProfilePictureModal()">&times;</button>
+      </div>
+      <div class="form-group">
+        <img id="profile-picture-preview" class="file-upload-preview" src="{% if jobseeker_profile.profile_picture %}{{ jobseeker_profile.profile_picture.url }}{% else %}{% static 'images/default-profile.png' %}{% endif %}">
+      </div>
+      <div class="form-group">
+        <label for="profile-picture-input">Select new profile picture</label>
+        <input type="file" id="profile-picture-input" accept="image/*" class="form-control">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" onclick="closeProfilePictureModal()">Cancel</button>
+        <button class="btn btn-primary" id="upload-profile-picture" onclick="uploadProfilePicture()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Theme Toggle Button -->
+  <button class="theme-toggle" id="theme-toggle">
+    <i class="fas fa-moon" id="theme-icon"></i>
+  </button>
+
+  <script>
+    // Dark Mode Toggle
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeIcon = document.getElementById('theme-icon');
+    const html = document.documentElement;
+
+    // Check for saved theme preference
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    if (currentTheme === 'dark') {
+      html.setAttribute('data-theme', 'dark');
+      themeIcon.classList.replace('fa-moon', 'fa-sun');
+    }
+
+    themeToggle.addEventListener('click', () => {
+      if (html.getAttribute('data-theme') === 'dark') {
+        html.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'light');
+        themeIcon.classList.replace('fa-sun', 'fa-moon');
+      } else {
+        html.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+        themeIcon.classList.replace('fa-moon', 'fa-sun');
+      }
+    });
+
+    // Profile Picture Modal
+    function openProfilePictureModal() {
+      document.getElementById('profile-picture-modal').style.display = 'flex';
+    }
+
+    function closeProfilePictureModal() {
+      document.getElementById('profile-picture-modal').style.display = 'none';
+      document.getElementById('profile-picture-input').value = '';
+    }
+
+    // Handle profile picture selection preview
+    document.getElementById('profile-picture-input').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        if (file.size > 5 * 1024 * 1024) {
+          showToast('File size should be less than 5MB', 'error');
+          this.value = '';
+          return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          document.getElementById('profile-picture-preview').src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Upload profile picture
+    async function uploadProfilePicture() {
+      const fileInput = document.getElementById('profile-picture-input');
+      const file = fileInput.files[0];
+      
+      if (!file) {
+        showToast('Please select an image file', 'error');
+        return;
+      }
+      
+      const token = localStorage.getItem('session_token');
+      if (!token) {
+        showToast('Please log in to update your profile', 'error');
+        return;
+      }
+      
+      const formData = new FormData();
+      formData.append('profile_picture', file);
+      
+      try {
+        document.getElementById('upload-profile-picture').disabled = true;
+        document.getElementById('upload-profile-picture').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+        
+        const response = await fetch('/profile/update-picture/', {
+          method: 'POST',
+          headers: {
+            'Session-Token': token
+          },
+          body: formData
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            document.getElementById('profile-picture').src = data.profile_picture_url;
+            closeProfilePictureModal();
+            showToast('Profile picture updated successfully!');
+          } else {
+            showToast(data.message || 'Failed to update picture', 'error');
+          }
+        } else {
+          const error = await response.json();
+          showToast(error.message || 'Error updating picture', 'error');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        showToast('An error occurred', 'error');
+      } finally {
+        document.getElementById('upload-profile-picture').disabled = false;
+        document.getElementById('upload-profile-picture').innerHTML = 'Save Changes';
+      }
+    }
+
+    // Toggle edit sections
+    function toggleEdit(section) {
+      const display = document.getElementById(`${section}-display`);
+      const edit = document.getElementById(`${section}-edit`);
+      
+      if (display.style.display === 'none') {
+        display.style.display = 'block';
+        edit.style.display = 'none';
+      } else {
+        display.style.display = 'none';
+        edit.style.display = 'block';
+      }
+    }
+    
+    // Save profile sections
+    async function saveSection(section) {
+      const token = localStorage.getItem('session_token');
+      if (!token) {
+        showToast('Please log in to save changes', 'error');
+        return;
+      }
+      
+      const formData = new FormData();
+      
+      if (section === 'resume') {
+        const resumeInput = document.getElementById('resume-input');
+        if (resumeInput.files[0]) {
+          if (resumeInput.files[0].size > 5 * 1024 * 1024) {
+            showToast('Resume file size should be less than 5MB', 'error');
+            return;
+          }
+          formData.append('resume', resumeInput.files[0]);
+        } else {
+          showToast('Please select a resume file', 'error');
+          return;
+        }
+      } else {
+        const inputValue = document.getElementById(`${section}-input`).value.trim();
+        if (!inputValue) {
+          showToast(`Please enter your ${section} information`, 'error');
+          return;
+        }
+        formData.append(section, inputValue);
+      }
+      
+      try {
+        // Show loading state
+        const saveButton = document.querySelector(`#${section}-edit .btn-primary`);
+        saveButton.disabled = true;
+        saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        
+        const response = await fetch('/profile/update/', {
+          method: 'POST',
+          headers: {
+            'Session-Token': token
+          },
+          body: formData
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          showToast('Profile updated successfully!');
+          // Refresh to show updated data
+          setTimeout(() => location.reload(), 1000);
+        } else {
+          const error = await response.json();
+          showToast(error.message || 'Failed to save changes', 'error');
+        }
+      } catch (error) {
+        console.error('Error saving profile:', error);
+        showToast('An error occurred while saving', 'error');
+      }
+    }
+
+    // Show toast notification
+    function showToast(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.style.position = 'fixed';
+      toast.style.bottom = '20px';
+      toast.style.left = '50%';
+      toast.style.transform = 'translateX(-50%)';
+      toast.style.backgroundColor = type === 'success' ? 'var(--success-color)' : 'var(--danger-color)';
+      toast.style.color = 'white';
+      toast.style.padding = '12px 24px';
+      toast.style.borderRadius = 'var(--border-radius)';
+      toast.style.boxShadow = 'var(--box-shadow)';
+      toast.style.zIndex = '1000';
+      toast.style.transition = 'all 0.3s ease';
+      toast.style.display = 'flex';
+      toast.style.alignItems = 'center';
+      toast.style.gap = '10px';
+      toast.textContent = message;
+      
+      const icon = document.createElement('i');
+      icon.className = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+      toast.prepend(icon);
+      
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+{%load static%}
+<link rel="stylesheet" href="{% static 'partials/job_list.css' %}">
+<div class="job-list-container">
+    <h1>Available Jobs</h1>
+
+    {% if jobs %}
+        <div class="job-grid">
+            {% for job in jobs %}
+                <div class="job-card">
+                    <div class="job-card-header">
+                        <h2 class="job-title">{{ job.title }}</h2>
+                        <span class="job-type">{{ job.job_type.name }}</span>
+                    </div>
+                    <p class="employer">🏢 {{ job.employer.fullname }}</p>
+                    <p class="location">📍 {{ job.location }}</p>
+                    {% if job.salary %}
+                        <p class="salary">💰 ${{ job.salary|floatformat:"0" }}</p>
+                    {% endif %}
+                    <div class="job-card-footer">
+                        <a href="{% url 'job_detail' job.id %}" class="view-button">View Details</a>
+                        <span class="deadline">⏰ {{ job.deadline|date:"M d, Y" }}</span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="no-jobs">No jobs available right now. Please check back later.</p>
+    {% endif %}
+</div>
